@@ -2,7 +2,7 @@ from app import app
 from data.psql import Database
 
 
-@app.before_server_start
+@app.listener('before_server_start')
 async def before_server_start(_app, _loop):
     # from settings import Settings
     #
@@ -17,7 +17,7 @@ async def before_server_start(_app, _loop):
     pass
 
 
-@app.after_server_stop
+@app.listener('after_server_stop')
 async def after_server_stop(_app, _loop):
     await Database.instance().close()
 

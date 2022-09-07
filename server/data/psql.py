@@ -1,5 +1,7 @@
+from typing import Optional, List
+
 import ujson
-from asyncpg import create_pool
+from asyncpg import create_pool, Pool, Record
 
 from server.core.logging import loggable
 
@@ -7,6 +9,7 @@ _database_instance = None
 
 
 class Database(object):
+    pool: Optional[Pool] = None
 
     @classmethod
     def instance(cls):
@@ -53,9 +56,24 @@ class Database(object):
             raise RuntimeError(f'{self.__name__}: connection refused to database')
 
     @loggable
-    def __getattr__(self, item):
-        async with self.pool.acquire() as db:
-            return await getattr(db, item)
+    async def execute(self, *args, **kwargs):
+        async with self.pool.acquire() as connection:
+            return await connection.execute(*args, **kwargs)
+
+    @loggable
+    async def fetch(self, *args, **kwargs) -> List[Record]:
+        async with self.pool.acquire() as connection:
+            return await connection.fetch(*args, **kwargs)
+
+    @loggable
+    async def fetchrow(self, *args, **kwargs) -> Record:
+        async with self.pool.acquire() as connection:
+            return await connection.fetchrow(*args, **kwargs)
+
+    @loggable
+    async def fetchval(self, *args, **kwargs):
+        async with self.pool.acquire() as connection:
+            return await connection.fetchval(*args, **kwargs)
 
     async def close(self):
         if self.pool:
