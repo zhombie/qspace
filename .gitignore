@@ -59,3 +59,9 @@ target/
 
 # Mac PyCharm
 .DS_Store
+
+# Pipfile
+Pipfile.lock
+
+# Local settings
+/server/settings/local.py
